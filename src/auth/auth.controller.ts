@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Headers, Res } from '@nestjs/common';
+import Express from 'express';
+import { Controller, Get, Post, Body, Headers, Response } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ILogin, IRegister } from './model';
 
@@ -14,11 +15,7 @@ export class AuthController {
   @Get('dashboard')
   dashboard(
     @Headers('authorization') authToken: string,
-    @Res()
-    response: {
-      redirect: (arg0: string) => void;
-      json: (arg0: string) => void;
-    },
+    @Response() response: Express.Response,
   ) {
     return authToken
       ? this.authService.dashboard(authToken, response)

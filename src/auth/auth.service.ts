@@ -1,3 +1,4 @@
+import Express from 'express';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { ConfigService } from '@nestjs/config';
@@ -53,13 +54,7 @@ export class AuthService {
     }
   }
 
-  async dashboard(
-    authToken: string,
-    response: {
-      redirect: (arg0: string) => void;
-      json: (arg0: string) => void;
-    },
-  ) {
+  async dashboard(authToken: string, response: Express.Response) {
     try {
       const { sub } = await this.verifyToken(authToken.split(' ')[1]);
       const user = await this.prisma.user.findUnique({

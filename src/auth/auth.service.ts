@@ -1,4 +1,3 @@
-import Express from 'express';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { ConfigService } from '@nestjs/config';
@@ -8,7 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt/dist';
 import * as argon2 from 'argon2';
 
-import { ILogin, IRegister } from './model';
+import { Login_dto, Register_dto } from './model';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +17,7 @@ export class AuthService {
     private jwt: JwtService,
   ) {}
 
-  async login(dto: ILogin) {
+  async login(dto: Login_dto) {
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -34,7 +33,7 @@ export class AuthService {
     return { authToken: await this.signToken(user.id) };
   }
 
-  async register(dto: IRegister) {
+  async register(dto: Register_dto) {
     const hash = await argon2.hash(dto.password);
     try {
       await this.prisma.user.create({
@@ -54,22 +53,6 @@ export class AuthService {
     }
   }
 
-  async dashboard(authToken: string, response: Express.Response) {
-    try {
-      const { sub } = await this.verifyToken(authToken.split(' ')[1]);
-      const user = await this.prisma.user.findUnique({
-        where: {
-          id: sub,
-        },
-      });
-      if (user) {
-        return response.json('Welcome to secured dashboard');
-      }
-    } catch (err) {
-      return response.redirect('/login');
-    }
-  }
-
   signToken(userId: string) {
     return this.jwt.signAsync(
       {
@@ -82,11 +65,5 @@ export class AuthService {
         secret: this.config.get('JWT_SECRET'),
       },
     );
-  }
-
-  verifyToken(token: string) {
-    return this.jwt.verifyAsync(token, {
-      secret: this.config.get('JWT_SECRET'),
-    });
   }
 }

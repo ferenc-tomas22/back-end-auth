@@ -1,34 +1,18 @@
-import Express from 'express';
-import { Controller, Get, Post, Body, Headers, Response } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ILogin, IRegister } from './model';
+import { Login_dto, Register_dto } from './model';
 
 @Controller('')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
-
-  @Get('')
-  homePage() {
-    return 'Welcome to the home page';
-  }
-
-  @Get('dashboard')
-  dashboard(
-    @Headers('authorization') authToken: string,
-    @Response() response: Express.Response,
-  ) {
-    return authToken
-      ? this.authService.dashboard(authToken, response)
-      : response.redirect('/');
-  }
+  constructor(private authService: AuthService) {}
 
   @Post('login')
-  login(@Body() dto: ILogin) {
+  login(@Body() dto: Login_dto) {
     return this.authService.login(dto);
   }
 
   @Post('register')
-  register(@Body() dto: IRegister) {
+  register(@Body() dto: Register_dto) {
     return this.authService.register(dto);
   }
 }

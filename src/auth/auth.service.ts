@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import { JwtService } from '@nestjs/jwt/dist';
+import { Response } from 'express';
 import * as argon2 from 'argon2';
 
 import { Login_dto, Register_dto } from './model';
@@ -17,7 +18,7 @@ export class AuthService {
     private jwt: JwtService,
   ) {}
 
-  async login(dto: Login_dto) {
+  async login(dto: Login_dto, res: Response) {
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -26,11 +27,23 @@ export class AuthService {
     if (!user) {
       throw new ForbiddenException('Email is not registered');
     }
+
     const valid = await argon2.verify(user.password, dto.password);
     if (!valid) {
       throw new ForbiddenException('Invalid password');
     }
-    return { authToken: await this.signToken(user.id) };
+
+    const jwt_token = await this.signToken(user.id);
+    res
+      .cookie('jwt', jwt_token, {
+        // secure: true, // only send cookie over https
+        httpOnly: true, // prevent client side js from reading the cookie
+        maxAge: this.minutesToMilliseconds(
+          parseInt(this.config.get('COOKIE_EXPIRATION')),
+        ),
+      })
+      .status(200)
+      .json({ userId: user.id });
   }
 
   async register(dto: Register_dto) {
@@ -65,5 +78,9 @@ export class AuthService {
         secret: this.config.get('JWT_SECRET'),
       },
     );
+  }
+
+  minutesToMilliseconds(minutes: number) {
+    return minutes * 60 * 1000;
   }
 }

@@ -8,6 +8,6 @@ export class AppController {
   @UseGuards(JwtGuard)
   @Get('dashboard')
   getDashboard() {
-    return 'Welcome to the dashboard';
+    return 'Welcome to secured dashboard';
   }
 }

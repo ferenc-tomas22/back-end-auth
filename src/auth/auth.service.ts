@@ -42,8 +42,7 @@ export class AuthService {
           parseInt(this.config.get('COOKIE_EXPIRATION')),
         ),
       })
-      .status(200)
-      .json({ userId: user.id });
+      .status(200);
   }
 
   async register(dto: Register_dto) {

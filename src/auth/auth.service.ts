@@ -36,13 +36,15 @@ export class AuthService {
     const jwt_token = await this.signToken(user.id);
     res
       .cookie('jwt', jwt_token, {
-        // secure: true, // only send cookie over https
-        httpOnly: true, // prevent client side js from reading the cookie
+        secure: true, // Only send cookie over https, "Secure" attribute is required in order to use "SameSite=none".
+        httpOnly: true, // Prevent client side js from reading the cookie
         maxAge: this.minutesToMilliseconds(
           parseInt(this.config.get('COOKIE_EXPIRATION')),
         ),
+        sameSite: 'none', // Using "none" to allow cross-site cookie
       })
-      .status(200);
+      .status(200)
+      .json({ userId: user.id });
   }
 
   async register(dto: Register_dto) {

@@ -41,7 +41,7 @@ export class AuthService {
         maxAge: this.minutesToMilliseconds(
           parseInt(this.config.get('COOKIE_EXPIRATION')),
         ),
-        sameSite: 'none', // Using "none" to allow cross-site cookie
+        sameSite: 'none', // Cookies will be sent in all contexts, i.e. in responses to both first-party and cross-site requests.
       })
       .status(200)
       .json({ userId: user.id });
